@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileCrypto</title>
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4cc9f0;
+      --light-gray: #f1f1f1;
+      --dark-gray: #333;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: default;
+    }
+    
+    a, button, .btn, .file-input-label, .copy-btn, .download-qr-btn {
+      cursor: pointer;
+    }
+    
+    input, textarea {
+      cursor: text;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark-gray);
+      background-color: var(--light-gray);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 15px 0;
+    }
+    
+    .navbar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+    
+    .nav-links li {
+      margin-left: 20px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--dark-gray);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    .content {
+      min-height: calc(100vh - 130px);
+      padding: 40px 0;
+    }
+    
+    .footer {
+      background-color: white;
+      text-align: center;
+      padding: 20px 0;
+      box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+      background-color: var(--secondary-color);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+    
+    .btn-outline:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 60px 0;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .action-buttons {
+      margin-top: 30px;
+    }
+    
+    .action-buttons .btn {
+      margin: 0 10px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+    }
+    
+    .features {
+      padding: 40px 0;
+    }
+    
+    .features h2 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--primary-color);
+    }
+    
+    .feature-cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+    
+    .feature-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 300px;
+      text-align: center;
+    }
+    
+    .feature-card h3 {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+    }
+    
+    .upload-container, .download-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .upload-container h1, .download-container h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .description {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #666;
+    }
+    
+    .upload-card, .download-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+    
+    .file-input-container {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: var(--light-gray);
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background-color 0.3s;
+    }
+    
+    .file-input-label:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .file-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(67, 97, 238, 0.05);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .file-info.visible {
+      display: block;
+    }
+    
+    .upload-btn, .verify-btn, .download-btn {
+      width: 100%;
+      padding: 12px;
+    }
+    
+    .success-message {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      border-radius: 4px;
+      text-align: center;
+      display: none;
+    }
+    
+    .success-message.visible {
+      display: block;
+    }
+    
+    .code-display {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 10px 0;
+    }
+    
+    .copy-btn {
+      background-color: var(--light-gray);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+    }
+    
+    .copy-btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    
+    .file-details {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: rgba(67, 97, 238, 0.05);
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .file-details.visible {
+      display: block;
+    }
+    
+    .file-details h3 {
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+    
+    .file-details p {
+      margin-bottom: 5px;
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .error-message.visible {
+      display: block;
+    }
+    
+    /* QR Code Styles */
+    .qr-container {
+      margin: 20px auto;
+      text-align: center;
+    }
+    
+    .qr-code-canvas {
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
+    }
+    
+    .download-qr-btn {
+      margin-top: 10px;
+      background-color: var(--light-gray);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s;
+    }
+    
+    .download-qr-btn:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container navbar-container">
+      <div class="logo">FileCrypto</div>
+      <ul class="nav-links">
+        <li><a href="#" id="home-link">Home</a></li>
+        <li><a href="#" id="upload-link">Upload</a></li>
+        <li><a href="#" id="download-link">Download</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="content">
+    <div class="container">
+      <div id="home-page">
+        <div class="hero">
+          <h1>Secure File Sharing Made Simple</h1>
+          <p>Upload your files and share them securely with unique codes. Files automatically expire after 24 hours for enhanced security.</p>
+          <div class="action-buttons">
+            <a href="#" class="btn" id="upload-btn">Upload File</a>
+            <a href="#" class="btn btn-outline" id="download-btn">Download File</a>
+          </div>
+        </div>
+        
+        <div class="features">
+          <h2>Key Features</h2>
+          <div class="feature-cards">
+            <div class="feature-card">
+              <h3>Secure Sharing</h3>
+              <p>Files are shared using unique codes, ensuring only those with the code can access your files.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Auto Expiry</h3>
+              <p>All files automatically expire after 24 hours, providing an extra layer of security.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Easy to Use</h3>
+              <p>Simple interface for uploading and downloading files with just a few clicks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="upload-page" style="display: none;">
+        <div class="upload-container">
+          <h1>Upload File</h1>
+          <p class="description">Select a file to upload and share securely</p>
+          
+          <div class="upload-card">
+            <div class="file-input-container">
+              <label for="file-input" class="file-input-label">Choose File</label>
+              <input type="file" id="file-input" class="file-input">
+              <p id="file-name">No file selected</p>
+            </div>
+            
+            <div class="file-info" id="file-info">
+              <h3>File Information</h3>
+              <p id="file-size"></p>
+              <p id="file-type"></p>
+            </div>
+            
+            <button class="btn upload-btn" id="upload-submit">Upload</button>
+            
+            <div class="success-message" id="success-message">
+              <h3>File Uploaded Successfully!</h3>
+              <p>Share this code to allow others to download your file:</p>
+              <div class="code-display" id="code-display"></div>
+              <button class="copy-btn" id="copy-btn">Copy Code</button>
+              
+              <div class="qr-container">
+                <p>Or scan this QR code:</p>
+                <div id="qrcode"></div>
+                <button class="download-qr-btn" id="download-qr-btn">Download QR Code</button>
+              </div>
+              
+              <p>The file will expire in 24 hours.</p>
+            </div>
+            
+            <div class="error-message" id="upload-error">
+              An error occurred during upload. Please try again.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="download-page" style="display: none;">
+        <div class="download-container">
+          <h1>Download File</h1>
+          <p class="description">Enter the code to download the shared file</p>
+          
+          <div class="download-card">
+            <div class="input-group">
+              <label for="code-input">Enter Code</label>
+              <input type="text" id="code-input" placeholder="Enter the file code">
+            </div>
+            
+            <button class="btn verify-btn" id="verify-btn">Verify</button>
+            
+            <div class="file-details" id="file-details">
+              <h3>File Details</h3>
+              <p id="file-name-display"></p>
+              <p id="file-expiry"></p>
+              
+              <button class="btn download-btn" id="download-file-btn">Download</button>
+            </div>
+            
+            <div class="error-message" id="download-error">
+              File not found or has expired. Please check the code and try again.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 FileCrypto. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // DOM Elements
+    const homeLink = document.getElementById('home-link');
+    const uploadLink = document.getElementById('upload-link');
+    const downloadLink = document.getElementById('download-link');
+    const uploadBtn = document.getElementById('upload-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    
+    const homePage = document.getElementById('home-page');
+    const uploadPage = document.getElementById('upload-page');
+    const downloadPage = document.getElementById('download-page');
+    
+    const fileInput = document.getElementById('file-input');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const fileType = document.getElementById('file-type');
+    const fileInfo = document.getElementById('file-info');
+    const uploadSubmit = document.getElementById('upload-submit');
+    const successMessage = document.getElementById('success-message');
+    const codeDisplay = document.getElementById('code-display');
+    const copyBtn = document.getElementById('copy-btn');
+    const uploadError = document.getElementById('upload-error');
+    const downloadQrBtn = document.getElementById('download-qr-btn');
+    
+    const codeInput = document.getElementById('code-input');
+    const verifyBtn = document.getElementById('verify-btn');
+    const fileDetails = document.getElementById('file-details');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const fileExpiry = document.getElementById('file-expiry');
+    const downloadFileBtn = document.getElementById('download-file-btn');
+    const downloadError = document.getElementById('download-error');
+    
+    // Navigation
+    function showPage(page) {
+      homePage.style.display = 'none';
+      uploadPage.style.display = 'none';
+      downloadPage.style.display = 'none';
+      
+      page.style.display = 'block';
+    }
+    
+    homeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(homePage);
+    });
+    
+    uploadLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(uploadPage);
+    });
+    
+    downloadLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(downloadPage);
+    });
+    
+    uploadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(uploadPage);
+    });
+    
+    downloadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(downloadPage);
+    });
+    
+    // File Upload
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      
+      if (file) {
+        fileName.textContent = `Selected: ${file.name}`;
+        fileSize.textContent = `Size: ${formatFileSize(file.size)}`;
+        fileType.textContent = `Type: ${file.type || 'Unknown'}`;
+        fileInfo.classList.add('visible');
+      } else {
+        fileName.textContent = 'No file selected';
+        fileInfo.classList.remove('visible');
+      }
+    });
+    
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      else if (bytes < 1073741824) return (bytes / 1048576).toFixed(2) + ' MB';
+      else return (bytes / 1073741824).toFixed(2) + ' GB';
+    }
+    
+    // Generate QR Code
+    function generateQRCode(code) {
+      const qrcodeContainer = document.getElementById('qrcode');
+      qrcodeContainer.innerHTML = ''; // Clear previous QR code
+      
+      const downloadUrl = `http://localhost:5000/api/files/download/${code}`;
+      
+      // Create a new canvas element
+      const canvas = document.createElement('canvas');
+      qrcodeContainer.appendChild(canvas);
+      
+      // Generate QR code directly on the canvas
+      QRCode.toCanvas(canvas, downloadUrl, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: '#4361ee',
+          light: '#ffffff'
+        }
+      }, function(error) {
+        if (error) console.error(error);
+      });
+    }
+    
+    // Download QR Code as image
+    downloadQrBtn.addEventListener('click', () => {
+      const canvas = document.querySelector('#qrcode canvas');
+      if (canvas) {
+        const code = codeDisplay.textContent;
+        const link = document.createElement('a');
+        link.download = `filecrypto-qr-${code}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    });
+    
+    uploadSubmit.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Please select a file to upload');
+        return;
+      }
+      
+      uploadSubmit.disabled = true;
+      uploadSubmit.textContent = 'Uploading...';
+      uploadError.classList.remove('visible');
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/files/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+        
+        const data = await response.json();
+        
+        codeDisplay.textContent = data.code;
+        successMessage.classList.add('visible');
+        
+        // Generate QR code for the file
+        generateQRCode(data.code);
+      } catch (error) {
+        console.error('Error:', error);
+        uploadError.classList.add('visible');
+      } finally {
+        uploadSubmit.disabled = false;
+        uploadSubmit.textContent = 'Upload';
+      }
+    });
+    
+    copyBtn.addEventListener('click', () => {
+      const code = codeDisplay.textContent;
+      navigator.clipboard.writeText(code)
+        .then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy Code';
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+    });
+    
+    // File Download
+    verifyBtn.addEventListener('click', async () => {
+      const code = codeInput.value.trim();
+      
+      if (!code) {
+        alert('Please enter a code');
+        return;
+      }
+      
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying...';
+      fileDetails.classList.remove('visible');
+      downloadError.classList.remove('visible');
+      
+      try {
+        const response = await fetch(`http://localhost:5000/api/files/${code}`);
+        
+        if (!response.ok) {
+          throw new Error('File not found or expired');
+        }
+        
+        const data = await response.json();
+        
+        fileNameDisplay.textContent = `File: ${data.originalName}`;
+        
+        const expiryDate = new Date(data.expiresAt);
+        fileExpiry.textContent = `Expires: ${expiryDate.toLocaleString()}`;
+        
+        fileDetails.classList.add('visible');
+        downloadFileBtn.dataset.code = code;
+      } catch (error) {
+        console.error('Error:', error);
+        downloadError.classList.add('visible');
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify';
+      }
+    });
+    
+    downloadFileBtn.addEventListener('click', () => {
+      const code = downloadFileBtn.dataset.code;
+      
+      if (code) {
+        window.location.href = `http://localhost:5000/api/files/download/${code}`;
+      }
+    });
+  </script>
+</body>
+</html>
