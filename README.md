@@ -45,7 +45,7 @@ A secure file sharing application that allows users to upload files and share th
 
 4. Start the backend server:
    ```
-   npm start
+   npm start (or) node server.js
    ```
 
 ### Frontend Setup
