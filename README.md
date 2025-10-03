@@ -157,7 +157,7 @@ A secure file sharing application that allows users to upload files and share th
    ```
    # Start backend
    cd backend
-   npm start
+   npm start (or) node server.js
 
    # Start frontend (in a new terminal)
    cd frontend
