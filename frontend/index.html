@@ -575,7 +575,8 @@
       const qrcodeContainer = document.getElementById('qrcode');
       qrcodeContainer.innerHTML = ''; // Clear previous QR code
       
-      const downloadUrl = `http://localhost:5000/api/files/download/${code}`;
+      // Use relative URL that works with any domain (including ngrok)
+      const downloadUrl = `${window.location.origin}/api/files/download/${code}`;
       
       // Create a new canvas element
       const canvas = document.createElement('canvas');
