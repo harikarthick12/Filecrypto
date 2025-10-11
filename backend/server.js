@@ -1,8 +1,4 @@
-import cors from "cors";
-app.use(cors({
-  origin: ["https://filecrypto-is2z.vercel.app"] // frontend URL
-}));
-
+// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -12,22 +8,37 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const File = require('./models/File');
-const API_URL = "https://filecrypto-backend.onrender.com";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// --------------------
+// CORS
+// --------------------
+app.use(cors({
+  origin: [
+    "https://filecrypto-is2z.vercel.app", // deployed frontend
+    "http://localhost:3000"                // local frontend
+  ],
+  methods: ["GET", "POST"]
+}));
+
+// --------------------
+// MongoDB Connection
+// --------------------
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// --------------------
 // Middleware
-app.use(cors());
+// --------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --------------------
 // Ensure uploads directory exists
+// --------------------
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -36,11 +47,9 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve static files from uploads folder
 app.use('/uploads', express.static(uploadsDir));
 
-// Serve frontend files
-const frontendDir = path.join(__dirname, '..', 'frontend');
-app.use(express.static(frontendDir));
-
-// Configure multer for file uploads
+// --------------------
+// Multer Setup
+// --------------------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadsDir);
@@ -55,7 +64,11 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
 });
 
+// --------------------
 // Routes
+// --------------------
+
+// Upload file
 app.post('/api/files/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -87,6 +100,7 @@ app.post('/api/files/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Get file info
 app.get('/api/files/:code', async (req, res) => {
   try {
     const { code } = req.params;
@@ -98,9 +112,7 @@ app.get('/api/files/:code', async (req, res) => {
 
     if (new Date() > new Date(file.expiresAt)) {
       await File.deleteOne({ code });
-      if (fs.existsSync(file.filePath)) {
-        fs.unlinkSync(file.filePath);
-      }
+      if (fs.existsSync(file.filePath)) fs.unlinkSync(file.filePath);
       return res.status(404).json({ error: 'File has expired' });
     }
 
@@ -115,6 +127,7 @@ app.get('/api/files/:code', async (req, res) => {
   }
 });
 
+// Download file
 app.get('/api/files/download/:code', async (req, res) => {
   try {
     const { code } = req.params;
@@ -126,9 +139,7 @@ app.get('/api/files/download/:code', async (req, res) => {
 
     if (new Date() > new Date(file.expiresAt)) {
       await File.deleteOne({ code });
-      if (fs.existsSync(file.filePath)) {
-        fs.unlinkSync(file.filePath);
-      }
+      if (fs.existsSync(file.filePath)) fs.unlinkSync(file.filePath);
       return res.status(404).json({ error: 'File has expired' });
     }
 
@@ -139,7 +150,9 @@ app.get('/api/files/download/:code', async (req, res) => {
   }
 });
 
+// --------------------
 // Start server
+// --------------------
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
