@@ -7,6 +7,9 @@ function Download() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [fileInfo, setFileInfo] = useState(null);
+  const API = process.env.REACT_APP_API_URL;
+axios.post(`${API}/api/upload`, formData);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
