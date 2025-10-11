@@ -1,3 +1,8 @@
+import cors from "cors";
+app.use(cors({
+  origin: ["https://filecrypto-is2z.vercel.app"] // frontend URL
+}));
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
