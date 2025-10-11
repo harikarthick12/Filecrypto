@@ -7,6 +7,9 @@ function Upload() {
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
+  const API = process.env.REACT_APP_API_URL;
+axios.post(`${API}/api/upload`, formData);
+
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
